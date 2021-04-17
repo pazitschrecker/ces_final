@@ -1,0 +1,56 @@
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+    />
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+    />
+    <script src="../static/index.js"></script>
+    <script>
+      var score = {{ score| tojson}}
+      var q_id = {{ q_id| tojson}}
+      var question = {{ question| tojson}}
+    </script>
+  </head>
+
+  <body>
+    <div class="jumbotron">
+      <h1 class="display-4">Question {{q_id}}</h1>
+      <hr class="my-4" />
+      <p class="question">{{question}}</p>
+      <p class="lead"></p>
+    </div>
+
+    <div class="container">
+      <div class="row">
+        <input id="answer_area" size="30" placeholder="Answer here" />
+        <button
+          type="button"
+          class="btn btn-primary submit_answer_btn"
+          id="submit_{{q_id}}"
+        >
+          Submit Answer
+        </button>
+      </div>
+      <div class="row hidden">
+        <div class="hidden feedback_section" id="fs{{q_id}}"></div>
+      </div>
+      <div class="row hidden">
+        <button
+          class="hidden next_q_btn btn btn-outline-secondary left"
+          type="button"
+          name="button"
+          id="next_btn_{{q_id}}"
+        >
+          Next Question
+        </button>
+      </div>
+      <br /><br />
+    </div>
+  </body>
+</html>
