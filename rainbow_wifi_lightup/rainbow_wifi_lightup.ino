@@ -10,22 +10,34 @@
 //   a LOGIC-LEVEL CONVERTER on the data line is STRONGLY RECOMMENDED.
 // (Skipping these may work OK on your workbench but can fail in the field)
 
+#include <WebServer.h>
+#include <WiFi.h>
+#include <WiFiUdp.h>
+#include "Freenove_WS2812_Lib_for_ESP32.h"
+#include <Wire.h>
+#include <string>
+
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
  #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
 #endif
 
-// Which pin on the Arduino is connected to the NeoPixels?
-// On a Trinket or Gemma we suggest changing this to 1:
-#define LED_PIN    2
-#define LED2_PIN   5
+#define LED_PIN    2 // warm colors/strip1
+//#define LED2_PIN   5 // cool colors/strip2
 
 // How many NeoPixels are attached to the Arduino?
 #define LED_COUNT 60
 
+const char* ssid = "Guest Network";
+const char* password = "Guest_pw";
+WiFiUDP Udp;
+unsigned int localUdpPort = 4210;  //  port to listen on
+char incomingPacket[255];  // buffer for incoming packets
+
+
 // Declare our NeoPixel strip object:
 Adafruit_NeoPixel warm_strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
-Adafruit_NeoPixel cool_strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+//Adafruit_NeoPixel cool_strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 // Argument 1 = Number of pixels in NeoPixel strip
 // Argument 2 = Arduino pin number (most are valid)
 // Argument 3 = Pixel type flags, add together as needed:
@@ -37,6 +49,7 @@ Adafruit_NeoPixel cool_strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 
 // setup() function -- runs once at startup --------------------------------
+int score;
 
 void setup() {
   // These lines are specifically to support the Adafruit Trinket 5V 16 MHz.
@@ -46,16 +59,83 @@ void setup() {
 #endif
   // END of Trinket-specific code.
 
-  warm_strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
-  warm_strip.show();            // Turn OFF all pixels ASAP
-  warm_strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
+  // INITIALIZE NeoPixel strip objects (wartm and cool)
+  warm_strip.begin(); 
+  //cool_strip.begin();
+
+  // Turn OFF all pixels at start
+  warm_strip.show(); 
+  //cool_strip.show();   
+
+  // Set BRIGHTNESS to about 1/5 (max = 255)
+  warm_strip.setBrightness(50); 
+  //cool_strip.setBrightness(50); 
+
+  score = 0;
+
+  // try connecting to wifi
+  int status = WL_IDLE_STATUS;
+  Serial.begin(115200);
+  WiFi.begin(ssid, password);
+  Serial.println("");
+
+  // Wait for connection
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("Connected to wifi");
+  Udp.begin(localUdpPort);
+  Serial.printf("Now listening at IP %s, UDP port %d\n", WiFi.localIP().toString().c_str(), localUdpPort);
+
+ 
+  // we recv one packet from the remote so we can know its IP and port
+  /*bool readPacket = false;
+  while (!readPacket) {
+    int packetSize = Udp.parsePacket();
+    if (packetSize)
+     {
+      // receive incoming UDP packets
+      Serial.printf("Received %d bytes from %s, port %d\n", packetSize, Udp.remoteIP().toString().c_str(), Udp.remotePort());
+      int len = Udp.read(incomingPacket, 255);
+      if (len > 0)
+      {
+        incomingPacket[len] = 0;
+      }
+      Serial.printf("UDP packet contents: %s\n", incomingPacket);
+      readPacket = true;
+    } 
+  }*/
 }
 
 
 // loop() function -- runs repeatedly as long as board is on ---------------
 
 void loop() {
-  fill(1, 50);
+  bool readPacket = false;
+  while (!readPacket) {
+    int packetSize = Udp.parsePacket();
+    if (packetSize)
+     {
+      // receive incoming UDP packets
+      Serial.printf("Received %d bytes from %s, port %d\n", packetSize, Udp.remoteIP().toString().c_str(), Udp.remotePort());
+      int len = Udp.read(incomingPacket, 255);
+      if (len > 0)
+      {
+        incomingPacket[len] = 0;
+      }
+      Serial.printf("UDP packet contents (should be a number score): %s\n", incomingPacket);
+      readPacket = true;
+      //sscanf(incomingPacket, "%d", &score) 
+      //score = (int)incomingPacket;
+      score = score + 1;
+      Serial.printf("SCORE: %d\n", score);
+      fill(score, 50);
+    } 
+  }
+  //fill(score, 50);
+  //delay(500);
 }
 
 
@@ -63,34 +143,22 @@ void loop() {
 
 // function to fill certain percent of strip
 void fill(int numFifths, int wait) {
+  Serial.printf("reached fill function; numFifths = %d\n", numFifths);
   // number of pixels to fill: numFifths * 12
   // number to fill per color: numFifths * 12 /3 = numFifths * 4
  
   for (int j = 0; j < numFifths * 4; j++) {
     // set first strip: red, orange, yellow
-    warm_strip.setPixelColor(j, strip.Color(255, 0, 0)); // 1 - 20: red
-    warm_strip.setPixelColor(40-j, strip.Color(255, 60, 0)); // 40 - 21: orange
-    warm_strip.setPixelColor(j+41, strip.Color(255, 100, 0)); // 41 - 60: yellow
+    warm_strip.setPixelColor(j, warm_strip.Color(255, 0, 0)); // 1 - 20: red
+    warm_strip.setPixelColor(40-j, warm_strip.Color(255, 60, 0)); // 40 - 21: orange
+    warm_strip.setPixelColor(j+41, warm_strip.Color(255, 100, 0)); // 41 - 60: yellow
     warm_strip.show(); 
 
     // set second strip: green, blue, purple
-    cool_strip.setPixelColor(j, strip.Color(0, 255, 0)); // 1 - 20: green
-    cool_strip.setPixelColor(40-j, strip.Color(0, 0, 255)); // 40 - 21: blue
-    cool_strip.setPixelColor(j+41, strip.Color(200, 0, 255)); // 41 - 60: purple
-    cool_strip.show(); 
+    //cool_strip.setPixelColor(j, strip.Color(0, 255, 0)); // 1 - 20: green
+    //cool_strip.setPixelColor(40-j, strip.Color(0, 0, 255)); // 40 - 21: blue
+    //cool_strip.setPixelColor(j+41, strip.Color(200, 0, 255)); // 41 - 60: purple
+    //cool_strip.show(); 
     delay(wait); 
-  }
-}
-
-// Fill strip pixels one after another with a color. Strip is NOT cleared
-// first; anything there will be covered pixel by pixel. Pass in color
-// (as a single 'packed' 32-bit value, which you can get by calling
-// strip.Color(red, green, blue) as shown in the loop() function above),
-// and a delay time (in milliseconds) between pixels.
-void colorWipe(uint32_t color, int wait) {
-  for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
-    strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
-    strip.show();                          //  Update strip to match
-    delay(wait);                           //  Pause for a moment
   }
 }
