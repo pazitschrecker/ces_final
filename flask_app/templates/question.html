@@ -11,15 +11,68 @@
       href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
     />
     <script src="../static/index.js"></script>
+    <link rel="stylesheet" type="text/css" href="../static/index.css" />
     <script>
       var score = {{ score| tojson}}
       var q_id = {{ q_id| tojson}}
       var question = {{ question| tojson}}
     </script>
+    <style media="screen">
+      .center {
+        justify-content: center;
+        text-align: center;
+        align-items: middle;
+      }
+    </style>
   </head>
 
   <body>
-    <div class="jumbotron">
+    <div class="container">
+      <br />
+      <div class="container-column center">
+        <div class="score">Score: {{score}}/5</div>
+        <div class="question">
+          <strong>Question {{q_id}}</strong>: {{question}}
+        </div>
+      </div>
+      <br />
+      <br />
+
+      <div class="card question_answer">
+        <div class="card-body" id="answer_area_{{q_id}}">
+          <input id="answer_{{q_id}}" size="60" placeholder="Answer here" />
+          <button
+            type="button"
+            id="submit_{{q_id}}"
+            class="btn btn-primary submit_answer_btn"
+          >
+            Check Answer
+          </button>
+
+          <div class="hidden feedback_section" id="fs{{q_id}}"></div>
+        </div>
+      </div>
+
+      <div class="left">
+        <button
+          class="hidden next_q_btn btn btn-outline-primary left"
+          type="button"
+          name="button"
+          id="next_btn_{{q_id}}"
+        >
+          Next Question
+        </button>
+        <button
+          class="hidden btn btn-outline-primary left"
+          type="button"
+          name="button"
+          id="finish_btn"
+        >
+          Finish
+        </button>
+      </div>
+    </div>
+    <!--<div class="jumbotron">
       <h1 class="display-4">Question {{q_id}}</h1>
       <hr class="my-4" />
       <p class="question">{{question}}</p>
@@ -51,6 +104,6 @@
         </button>
       </div>
       <br /><br />
-    </div>
+    </div>-->
   </body>
 </html>

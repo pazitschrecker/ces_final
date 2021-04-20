@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+    />
+    <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+    />
+    <script src="../static/index.js"></script>
+    <script>
+      var score = {{ score| tojson}}
+    </script>
+  </head>
+
+  <body>
+    <div class="jumbotron">
+      <h1 class="display-4">Final Score: {{score}}</h1>
+      <hr class="my-4" />
+      <p>Congratulations on finishing the quiz!</p>
+      <p class="lead"></p>
+    </div>
+
+    <div class="container">
+      <button type="button" class="btn btn-primary" id="try_again_btn">
+        Try Again
+      </button>
+    </div>
+  </body>
+</html>

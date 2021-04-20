@@ -2,14 +2,23 @@ var load_question = function (q_id) {
   window.location.href = "http://127.0.0.1:5000/question/" + q_id + "";
 };
 
+var finish_quiz = function (q_id) {
+  window.location.href = "http://127.0.0.1:5000/done";
+};
+
 // render feedback for questions
-var render_feedback = function (q_id, feedback) {
+var render_feedback = function (q_id, feedback, correct) {
   $(".feedback_section").val("");
   $(".feedback_section").append(feedback);
   $(".feedback_section").removeClass("hidden");
   $(".feedback_section").show();
 
-  $("#next_btn_" + q_id).show();
+  if (correct == true) $("#answer_area_" + q_id).addClass("lightgreen");
+  else $("#answer_area_" + q_id).addClass("lightred");
+
+  if (q_id < 5) $("#next_btn_" + q_id).show();
+  //questions 1-4 have next question button
+  else $("#finish_btn").show(); //finish quiz after question 5
 };
 
 var send_signal = function () {
@@ -42,7 +51,8 @@ var check_answer = function (q_id, curr_answer) {
     success: function (result) {
       var feedback = result["feedback"];
       var score = result["score"];
-      render_feedback(q_id, feedback);
+      var correct = result["is_correct"];
+      render_feedback(q_id, feedback, correct);
       //console.log(feedback);
     },
     error: function (request, status, error) {
@@ -56,24 +66,29 @@ var check_answer = function (q_id, curr_answer) {
 
 $(document).ready(function () {
   $("#next_btn_" + q_id).hide();
+  $("#finish_btn").hide();
   $("#my_btn").click(function () {
-    console.log("pressed");
     send_signal();
   });
+
   $("#start_btn").click(function () {
-    console.log("load quiz");
     load_question(1);
   });
-  $(".submit_answer_btn").click(function () {
-    var q_id = parseInt($(this).attr("id").slice(-1));
-    var ans = $("#submit_" + q_id)
-      .val()
-      .trim();
+
+  $(".submit_answer_btn").click(function (e) {
+    var id = $(this).attr("id");
+    $("#" + id).attr("disabled", true);
+    var q_id = parseInt(id.slice(-1));
+    var ans = $("#answer_" + q_id).val();
     check_answer(q_id, ans);
   });
+
   $(".next_q_btn").click(function () {
     var new_q_id = parseInt($(this).attr("id").slice(-1)) + 1;
-    console.log("going to next question " + new_q_id);
     load_question(new_q_id);
+  });
+
+  $("#finish_btn").click(function () {
+    finish_quiz();
   });
 });
