@@ -65,13 +65,19 @@ var check_answer = function (q_id, curr_answer) {
 };
 
 $(document).ready(function () {
-  $("#next_btn_" + q_id).hide();
+  $(".next_q_btn").hide();
   $("#finish_btn").hide();
   $("#my_btn").click(function () {
     send_signal();
   });
 
+  $(".blabla").click(function () {
+    console.log("should load question");
+    load_question(1);
+  });
+
   $("#start_btn").click(function () {
+    console.log("should load question");
     load_question(1);
   });
 
