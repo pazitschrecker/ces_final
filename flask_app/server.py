@@ -53,6 +53,10 @@ sock.connect((UDP_IP, SHARED_UDP_PORT))
 
 @app.route('/')
 def home():
+    global score
+    if score != 0:
+        restart()
+    score = 0
     return render_template('index.html')
 
 
@@ -65,6 +69,9 @@ def question(num=None):
 
 @app.route('/done')
 def done():
+    global score
+    if score == 5:
+        winner()
     return render_template('finish.html', score=score)
 
 
@@ -90,14 +97,20 @@ def check_answer(id=None):
     return jsonify(feedback=feedback, score=score, is_correct=is_correct)
 
 
-# @app.route('/send_signal', methods=['GET', 'POST'])
-def send_signal():
+def send_signal():  # tell ESP32 to fill more sections of rainbow
     global score
-    sock.send(str(score).encode())
-    # sock.send('Hello ESP32'.encode())
+    sock.send("hello".encode())
     print("sent light up instructions with score: ", score)
 
-    # return jsonify()
+
+def restart():  # tell ESP32 to restart rainbow from beginning
+    sock.send("restart".encode())
+    print("RESTARTING")
+
+
+def winner():  # tell ESP32 to open cloud
+    sock.send("open".encode())
+    print("OPENING CLOUD")
 
 
 if __name__ == '__main__':

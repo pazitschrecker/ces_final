@@ -1,0 +1,54 @@
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  align-content: center;
+  vertical-align: middle;
+}
+
+.container-row {
+  display: flex;
+  width: 100%;
+  flex-direction: row;
+  text-align: center;
+  align-items: space-between;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 4px;
+  padding: 4px;
+}
+.pad_btn {
+  margin: 20px;
+}
+body {
+}
+
+body:before {
+  content: "";
+  background: url("https://static.billboard.com/files/media/rainbow-2018-billboard-1548-compressed.jpg");
+  opacity: 0.4;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center; /* Center the image */
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: -1;
+}
+
+.smaller {
+  font-size: 26px;
+}
+.score {
+  font-size: 60px;
+  border: 1px solid black;
+  border-radius: 16px;
+  text-align: center;
+  padding: 10px;
+  max-width: 50%;
+  margin-bottom: 10px;
+  margin-top: 20px;
+}

@@ -1,3 +1,5 @@
+var score = 0;
+
 var load_question = function (q_id) {
   window.location.href = "http://127.0.0.1:5000/question/" + q_id + "";
 };
@@ -50,7 +52,7 @@ var check_answer = function (q_id, curr_answer) {
     data: JSON.stringify(data),
     success: function (result) {
       var feedback = result["feedback"];
-      var score = result["score"];
+      score = result["score"];
       var correct = result["is_correct"];
       render_feedback(q_id, feedback, correct);
       //console.log(feedback);
@@ -96,5 +98,9 @@ $(document).ready(function () {
 
   $("#finish_btn").click(function () {
     finish_quiz();
+  });
+
+  $("#try_again_btn").click(function () {
+    window.location.href = "http://127.0.0.1:5000/";
   });
 });
