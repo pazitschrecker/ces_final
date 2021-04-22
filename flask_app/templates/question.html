@@ -44,9 +44,9 @@
           <button
             type="button"
             id="submit_{{q_id}}"
-            class="btn btn-primary submit_answer_btn"
+            class="btn btn-outline-dark submit_answer_btn"
           >
-            Check Answer
+            <strong>Check Answer</strong>
           </button>
 
           <div class="hidden feedback_section" id="fs{{q_id}}"></div>
@@ -55,20 +55,21 @@
 
       <div class="left">
         <button
-          class="hidden next_q_btn btn btn-outline-primary left"
+          class="hidden next_q_btn btn-lg btn-outline-info left"
           type="button"
           name="button"
           id="next_btn_{{q_id}}"
         >
-          Next Question
+          <strong>Next Question</strong><br />
         </button>
+
         <button
-          class="hidden btn btn-outline-primary left"
           type="button"
           name="button"
+          class="hidden btn btn-lg btn-outline-info pad_btn left"
           id="finish_btn"
         >
-          Finish
+          <strong>Finish</strong><br />
         </button>
       </div>
     </div>

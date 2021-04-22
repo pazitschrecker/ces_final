@@ -11,29 +11,31 @@
       href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
     />
     <script src="../static/index.js"></script>
+    <link rel="stylesheet" type="text/css" href="../static/homepage.css" />
   </head>
 
   <body>
-    <div class="jumbotron">
-      <h1 class="display-4">Rainbow Quiz!!</h1>
-      <hr class="my-4" />
-      <p>
-        Welcome to Somewhere over the ESP32. Here you will take a short quiz.
-        You can track your progress on the embedded rainbow system next to this
-        laptop. If you reach the end of the rainbow you just might win a prize!
-      </p>
-      <p class="lead"></p>
-    </div>
-
     <div class="container">
-      <button
-        class="btn btn-outline-primary blabla"
-        type="button"
-        name="button"
-        id="start_btn"
-      >
-        Start Quiz
-      </button>
+      <br />
+      <h1 class="bigger">Welcome</h1>
+
+      <div class="container-row smaller">
+        <p>
+          Hello there! On this page you will have the opportunity to prove your
+          rainbow knowledge. Simply answer the 5 quiz questions and track your
+          progress on the embedded rainbow system next to this laptop. If you
+          reach the end of the rainbow you just might win a prize!
+        </p>
+
+        <button
+          type="button"
+          name="button"
+          class="btn btn-lg btn-outline-dark pad_btn"
+          id="start_btn"
+        >
+          <strong>Take Quiz</strong><br />
+        </button>
+      </div>
     </div>
   </body>
 </html>

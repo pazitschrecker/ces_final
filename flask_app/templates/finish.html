@@ -11,24 +11,32 @@
       href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
     />
     <script src="../static/index.js"></script>
-    <link rel="stylesheet" type="text/css" href="../static/index.css" />
+    <link rel="stylesheet" type="text/css" href="../static/finish.css" />
     <script>
       var score = {{ score| tojson}}
     </script>
   </head>
 
   <body>
-    <div class="jumbotron">
-      <h1 class="display-4">Final Score: {{score}}</h1>
-      <hr class="my-4" />
-      <p>Congratulations on finishing the quiz!</p>
-      <p class="lead"></p>
-    </div>
-
     <div class="container">
-      <button type="button" class="btn btn-primary" id="try_again_btn">
-        Try Again
-      </button>
+      <br />
+      <h1 class="score">Final Score: {{score}}</h1>
+
+      <div class="container-row smaller">
+        <p>
+          Congratulations on finishing the quiz! If you would like to try again,
+          please click the button below:
+        </p>
+
+        <button
+          type="button"
+          name="button"
+          class="btn btn-lg btn-outline-dark pad_btn"
+          id="try_again_btn"
+        >
+          <strong>Try Again</strong><br />
+        </button>
+      </div>
     </div>
   </body>
 </html>
