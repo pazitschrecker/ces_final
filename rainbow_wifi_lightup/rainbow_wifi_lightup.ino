@@ -1,21 +1,12 @@
-// A basic everyday NeoPixel strip test program.
-
-// NEOPIXEL BEST PRACTICES for most reliable operation:
-// - Add 1000 uF CAPACITOR between NeoPixel strip's + and - connections.
-// - MINIMIZE WIRING LENGTH between microcontroller board and first pixel.
-// - NeoPixel strip's DATA-IN should pass through a 300-500 OHM RESISTOR.
-// - AVOID connecting NeoPixels on a LIVE CIRCUIT. If you must, ALWAYS
-//   connect GROUND (-) first, then +, then data.
-// - When using a 3.3V microcontroller with a 5V-powered NeoPixel strip,
-//   a LOGIC-LEVEL CONVERTER on the data line is STRONGLY RECOMMENDED.
-// (Skipping these may work OK on your workbench but can fail in the field)
-
 #include <WebServer.h>
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include "Freenove_WS2812_Lib_for_ESP32.h"
 #include <Wire.h>
-#include <string>
+#include <ESP32Servo.h>
+
+#include <stdio.h>
+#include <string.h>
 
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
@@ -23,33 +14,32 @@
 #endif
 
 #define LED_PIN    2 // warm colors/strip1
-//#define LED2_PIN   5 // cool colors/strip2
+#define LED2_PIN   5 // cool colors/strip2
 
-// How many NeoPixels are attached to the Arduino?
+#define SINGLE_LED_PIN  13  // single LED to show that wifi is connected
+Servo myservo; // create servo object to control a servo 
+int posVal = 0; // variable to store the servo position 
+int servoPin = 14; // Servo motor pin
+
+// How many LEDs in strip 
 #define LED_COUNT 60
 
 const char* ssid = "Guest Network";
-const char* password = "Guest_pw";
+const char* password = "guest_pw";
 WiFiUDP Udp;
 unsigned int localUdpPort = 4210;  //  port to listen on
 char incomingPacket[255];  // buffer for incoming packets
+char restart[255] = "restart";
+char openCloud[255] = "open";
 
-
-// Declare our NeoPixel strip object:
+// Declare LED strip objects
 Adafruit_NeoPixel warm_strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
-//Adafruit_NeoPixel cool_strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
-// Argument 1 = Number of pixels in NeoPixel strip
-// Argument 2 = Arduino pin number (most are valid)
-// Argument 3 = Pixel type flags, add together as needed:
-//   NEO_KHZ800  800 KHz bitstream (most NeoPixel products w/WS2812 LEDs)
-//   NEO_KHZ400  400 KHz (classic 'v1' (not v2) FLORA pixels, WS2811 drivers)
-//   NEO_GRB     Pixels are wired for GRB bitstream (most NeoPixel products)
-//   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
-//   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
+Adafruit_NeoPixel cool_strip(LED_COUNT, LED2_PIN, NEO_GRB + NEO_KHZ800);
 
+int score;
+int played;
 
 // setup() function -- runs once at startup --------------------------------
-int score;
 
 void setup() {
   // These lines are specifically to support the Adafruit Trinket 5V 16 MHz.
@@ -61,17 +51,28 @@ void setup() {
 
   // INITIALIZE NeoPixel strip objects (wartm and cool)
   warm_strip.begin(); 
-  //cool_strip.begin();
+  cool_strip.begin();
 
   // Turn OFF all pixels at start
   warm_strip.show(); 
-  //cool_strip.show();   
+  cool_strip.show();   
+  
+  // Set BRIGHTNESS to about 1/8 (max = 255)
+  warm_strip.setBrightness(30); 
+  cool_strip.setBrightness(30); 
 
-  // Set BRIGHTNESS to about 1/5 (max = 255)
-  warm_strip.setBrightness(50); 
-  //cool_strip.setBrightness(50); 
+  pinMode(SINGLE_LED_PIN, OUTPUT);
+
+  // standard 50 hz servo
+  myservo.setPeriodHertz(50);    
+     
+  // attaches the servo on servoPin to the servo  
+  myservo.attach(servoPin, 500, 2500);
+
+
 
   score = 0;
+  played = 0;
 
   // try connecting to wifi
   int status = WL_IDLE_STATUS;
@@ -85,28 +86,12 @@ void setup() {
     Serial.print(".");
   }
 
+  // turn on single LED to show that ESP32 is connected to wifi
+  digitalWrite(SINGLE_LED_PIN, HIGH);
+  
   Serial.println("Connected to wifi");
   Udp.begin(localUdpPort);
-  Serial.printf("Now listening at IP %s, UDP port %d\n", WiFi.localIP().toString().c_str(), localUdpPort);
-
- 
-  // we recv one packet from the remote so we can know its IP and port
-  /*bool readPacket = false;
-  while (!readPacket) {
-    int packetSize = Udp.parsePacket();
-    if (packetSize)
-     {
-      // receive incoming UDP packets
-      Serial.printf("Received %d bytes from %s, port %d\n", packetSize, Udp.remoteIP().toString().c_str(), Udp.remotePort());
-      int len = Udp.read(incomingPacket, 255);
-      if (len > 0)
-      {
-        incomingPacket[len] = 0;
-      }
-      Serial.printf("UDP packet contents: %s\n", incomingPacket);
-      readPacket = true;
-    } 
-  }*/
+  Serial.printf("Now listening at IP %s, UDP port %d\n", WiFi.localIP().toString().c_str(), localUdpPort); 
 }
 
 
@@ -125,28 +110,40 @@ void loop() {
       {
         incomingPacket[len] = 0;
       }
-      Serial.printf("UDP packet contents (should be a number score): %s\n", incomingPacket);
+      Serial.printf("UDP packet contents: %s\n", incomingPacket);
       readPacket = true;
-      //sscanf(incomingPacket, "%d", &score) 
-      //score = (int)incomingPacket;
-      score = score + 1;
-      Serial.printf("SCORE: %d\n", score);
-      fill(score, 50);
+      
+      // packet tells ESP32 to reset
+      if (strcmp (incomingPacket,restart) == 0) {
+        Serial.printf(" incomingPacket: %s\n restart: %s\n", incomingPacket, restart);
+        resetStrips();
+      }
+
+      // open cloud with servo
+      else if (strcmp (incomingPacket,openCloud) == 0) {
+        Serial.printf("opening cloud");
+        moveCloud(1);
+      }
+
+      // score updated, fill in more of rainbow
+      else {
+       score = score + 1;
+        Serial.printf("SCORE: %d\n", score);
+        fill(score, 50);
+      }
     } 
   }
-  //fill(score, 50);
-  //delay(500);
 }
 
 
-// Some functions of our own for creating animated effects -----------------
+// Helper functions -----------------
 
 // function to fill certain percent of strip
 void fill(int numFifths, int wait) {
   Serial.printf("reached fill function; numFifths = %d\n", numFifths);
   // number of pixels to fill: numFifths * 12
   // number to fill per color: numFifths * 12 /3 = numFifths * 4
- 
+  
   for (int j = 0; j < numFifths * 4; j++) {
     // set first strip: red, orange, yellow
     warm_strip.setPixelColor(j, warm_strip.Color(255, 0, 0)); // 1 - 20: red
@@ -155,10 +152,47 @@ void fill(int numFifths, int wait) {
     warm_strip.show(); 
 
     // set second strip: green, blue, purple
-    //cool_strip.setPixelColor(j, strip.Color(0, 255, 0)); // 1 - 20: green
-    //cool_strip.setPixelColor(40-j, strip.Color(0, 0, 255)); // 40 - 21: blue
-    //cool_strip.setPixelColor(j+41, strip.Color(200, 0, 255)); // 41 - 60: purple
-    //cool_strip.show(); 
+    cool_strip.setPixelColor(j, cool_strip.Color(0, 255, 0)); // 1 - 20: green
+    cool_strip.setPixelColor(40-j, cool_strip.Color(0, 0, 255)); // 40 - 21: blue
+    cool_strip.setPixelColor(j+41, cool_strip.Color(200, 0, 255)); // 41 - 60: purple
+    cool_strip.show(); 
     delay(wait); 
+  }
+}
+
+// function to reset
+void resetStrips() {
+  score = 0;
+  
+  if (played == 1) {
+    // move cloud back to original position if not in original position
+    moveCloud(-1);
+  }
+
+  // turn off all pixels
+  for (int j = 0; j < LED_COUNT; j++) {
+      warm_strip.setPixelColor(j, warm_strip.Color(0, 0, 0));
+      cool_strip.setPixelColor(j, cool_strip.Color(0, 0, 0));
+  }
+
+  warm_strip.show();
+  cool_strip.show();
+}
+
+void moveCloud(int dir) {
+  if (dir > 0) {
+    for (int posVal = 0; posVal <= 90; posVal += 1) {
+       myservo.write(posVal); // tell servo to go to position in variable 'pos' 
+       delay(15);
+        Serial.printf("CLOUD OPENING");
+       played = 1;
+    }
+  }
+  else {
+    for (int posVal = 90; posVal >= 0; posVal -= 1) {
+       myservo.write(posVal); // tell servo to go to position in variable 'pos' 
+       delay(15);
+       played = 0;
+    }
   }
 }
