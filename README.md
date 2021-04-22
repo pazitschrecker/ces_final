@@ -16,6 +16,13 @@ In order to run the project, you will also need to install the follow arduino ID
 
 These libraries can be installed by going to Arduino IDE --> "Tools" --> "Manage Libraries" --> Search for the name of the library and install it. You will need to restart the Arduino IDE before using.
 
+This project also requires the Flask for python as well as python3. 
+python 3 -- I installed with brew install python3 If you do not have homebrew (or are not on a macOS/Linux): https://www.python.org/downloads/
+
+flask framework for python -- pip3 install flask
+
+If you do not already have pip installed, type the following into the command line: curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py followed by python3 get-pip.py
+
 # Physical Setup
 
 For this project, all physical components were connected to the ESP32 via a breadboard. First, set up the ESP32 by plugging it into the GPIO Extender and then into a breadboard.
