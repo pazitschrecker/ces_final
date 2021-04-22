@@ -4,6 +4,9 @@
 This project is meant to provide users with an interactive and whimsical learning experience. Users interact with both the hardware and software aspects of this project. The user takes an interactive quiz (built as a Python Flask application) and tracks their progress on the physical lit-up rainbow (built on an ESP32 with LED strips). As the user answers questions correctly, more sections of the rainbow light up, moving from left to right. Once the user has answered every question correctly, a cloud cutout at the end of the rainbow moves to reveal a prize.
 
 Watch a video demo: https://youtu.be/fSHOEaCylMY 
+
+# Running the Web Application
+To run the project, connect both the ESP32 and laptop to the same wifi network (I used a mobile hotspot). The ESP32 has a small LED attached that will light up once connected to wifi. Once this is connected, begin running the flask web application by cd-ing into the correct folder and typing `python3 server.py` into the terminal. Once the server is running, type: `http://127.0.0.1:5000/` into the search bar of your browser (I recommend using Chrome). After that you're good to go!
  
 # Dependencies
 This project requires the Arduino IDE to run. You can download it here: https://www.arduino.cc/en/software
