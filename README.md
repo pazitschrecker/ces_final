@@ -11,6 +11,7 @@ Make sure to select the correct download based on your machine (I used a MacBook
 In order to run the project, you will also need to install the follow arduino IDE libraries:
 
 `Freenove_WS2812_Lib_for_ESP32.h`
+
 `Adafruit_NeoPixel.h`
 
 These libraries can be installed by going to Arduino IDE --> "Tools" --> "Manage Libraries" --> Search for the name of the library and install it. You will need to restart the Arduino IDE before using.
